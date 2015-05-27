@@ -23,7 +23,7 @@ import hashlib
 import hmac
 import logging
 import re
-import urlparse
+import urllib.parse as urlparse
 from . import util
 
 log = logging.getLogger("cfn.init")

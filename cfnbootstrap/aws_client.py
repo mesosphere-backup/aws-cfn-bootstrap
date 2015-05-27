@@ -33,7 +33,7 @@ import logging
 import operator
 import re
 import urllib
-import urlparse
+import urllib.parse as urlparse
 
 log = logging.getLogger('cfn.client')
 
