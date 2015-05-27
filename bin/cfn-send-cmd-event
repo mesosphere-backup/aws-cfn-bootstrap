@@ -27,7 +27,7 @@ import sys
 
 import cfnbootstrap
 from cfnbootstrap import util
-from cfnbootstrap.packages import requests
+import requests
 
 
 try:

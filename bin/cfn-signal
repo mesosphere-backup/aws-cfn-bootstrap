@@ -24,7 +24,7 @@ from optparse import OptionParser
 from optparse import OptionGroup
 import base64
 import re
-from cfnbootstrap.packages import requests
+import requests
 import socket
 import sys
 

@@ -4,4 +4,3 @@ include CHANGELOG.txt
 include MANIFEST.in
 include init/ubuntu/cfn-hup
 include init/redhat/cfn-hup
-include cfnbootstrap/packages/requests/cacert.pem
