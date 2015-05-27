@@ -21,7 +21,7 @@ AWSClient - an HTTP client that makes signed requests
 
 """
 from cfnbootstrap import util
-from cfnbootstrap.packages.requests import api
+from requests import api
 from xml.etree import ElementTree
 import StringIO
 import base64

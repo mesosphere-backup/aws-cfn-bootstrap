@@ -15,7 +15,7 @@
 #==============================================================================
 import urllib
 import operator
-from cfnbootstrap.packages.requests.auth import AuthBase, HTTPBasicAuth
+from requests.auth import AuthBase, HTTPBasicAuth
 import base64
 import datetime
 import hashlib

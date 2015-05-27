@@ -21,7 +21,7 @@ from zipfile import BadZipfile
 import logging
 import os.path
 import re
-from cfnbootstrap.packages import requests
+import requests
 import shutil
 import tarfile
 import tempfile

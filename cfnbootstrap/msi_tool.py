@@ -18,7 +18,7 @@ from cfnbootstrap.construction_errors import ToolError
 import logging
 import os
 import re
-from cfnbootstrap.packages import requests
+import requests
 import tempfile
 
 log = logging.getLogger("cfn.init")

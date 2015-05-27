@@ -26,8 +26,8 @@ if sys.version_info[0] == 2 and sys.version_info[1] < 6:
         print >> sys.stderr, "Python 2.6+ is required"
         sys.exit(1)
 
-rpm_requires = ['python >= 2.6', 'python-daemon', 'pystache']
-dependencies = ['python-daemon>=1.5.2,<2.0', 'pystache>=0.4.0']
+rpm_requires = ['python >= 2.6', 'python-daemon', 'pystache', 'python-requests']
+dependencies = ['python-daemon>=1.5.2,<2.0', 'pystache>=0.4.0', 'python-requests>=2.6.0']
 
 _distclass = Distribution
 _opts = {
@@ -58,7 +58,7 @@ try:
                         'dll_excludes' : ['msvcr71.dll', 'w9xpopen.exe', ''],
                         'compressed' : True,
                       }
-    _data_files = [('', ['license/win/NOTICE.txt', 'license/win/LICENSE.rtf', 'cfnbootstrap/packages/requests/cacert.pem', 'CHANGELOG.txt'])]
+    _data_files = [('', ['license/win/NOTICE.txt', 'license/win/LICENSE.rtf', 'CHANGELOG.txt'])]
 except ImportError:
     pass
 
@@ -74,19 +74,10 @@ setup(
     license='Apache 2.0',
     classifiers = ['License :: OSI Approved :: Apache Software License'],
     packages=[
-        'cfnbootstrap',
-        'cfnbootstrap.packages',
-        'cfnbootstrap.packages.requests',
-        'cfnbootstrap.packages.requests.packages',
-        'cfnbootstrap.packages.requests.packages.chardet',
-        'cfnbootstrap.packages.requests.packages.urllib3',
-        'cfnbootstrap.packages.requests.packages.urllib3.packages',
-        'cfnbootstrap.packages.requests.packages.urllib3.contrib',
-        'cfnbootstrap.packages.requests.packages.urllib3.packages.ssl_match_hostname'
+        'cfnbootstrap'
     ],
     install_requires=dependencies,
     scripts=['bin/cfn-init', 'bin/cfn-signal', 'bin/cfn-get-metadata', 'bin/cfn-hup', 'bin/cfn-elect-cmd-leader', 'bin/cfn-send-cmd-result', 'bin/cfn-send-cmd-event'],
     data_files=_data_files,
-    package_data={'cfnbootstrap': ['packages/requests/cacert.pem']},
     options=_opts
 )

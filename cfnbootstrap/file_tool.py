@@ -19,7 +19,7 @@ from contextlib import contextmanager
 import base64
 import logging
 import os
-from cfnbootstrap.packages import requests
+import requests
 import stat
 
 _templates_supported = True

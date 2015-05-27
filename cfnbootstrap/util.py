@@ -17,14 +17,14 @@ import hashlib
 from optparse import OptionGroup
 import threading
 import datetime
-from cfnbootstrap.packages.requests.exceptions import ConnectionError, HTTPError, Timeout, SSLError
+from requests.exceptions import ConnectionError, HTTPError, Timeout, SSLError
 import StringIO
 import imp
 import logging
 import os.path
 import random
 import re
-from cfnbootstrap.packages import requests
+import requests
 import stat
 import subprocess
 import sys
@@ -36,7 +36,7 @@ except ImportError:
     import json
 
 try:
-    from cfnbootstrap.packages.requests.packages.urllib3.exceptions import ProxyError
+    from requests.packages.urllib3.exceptions import ProxyError
 except ImportError:
     class ProxyError(Exception):
         def __init__(self, *args, **kwargs):
