@@ -126,7 +126,7 @@ def configureLogging(level='INFO', quiet=False, filename='cfn-init.log', log_dir
     config['all_handlers'] = ','.join(all_handlers)
 
     try:
-        logging.config.fileConfig(StringIO.StringIO(_config), config)
+        logging.config.fileConfig(StringIO(_config), config)
     except IOError:
         config['all_handlers'] = 'tostderr'
         config['root_handler'] = 'tostderr'
@@ -134,4 +134,4 @@ def configureLogging(level='INFO', quiet=False, filename='cfn-init.log', log_dir
         config['cmd_handler']  = 'null'
         if not quiet:
             print("Could not open %s for logging.  Using stderr instead." % output_file, file=sys.stderr)
-        logging.config.fileConfig(StringIO.StringIO(_config), config)
+        logging.config.fileConfig(StringIO(_config), config)

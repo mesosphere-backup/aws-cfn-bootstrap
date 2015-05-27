@@ -204,7 +204,7 @@ class Client(object):
     def _get_xml_extractor(xmlns):
         def _extract_xml_message(resp):
             try:
-                eDoc = ElementTree.ElementTree(file=StringIO.StringIO(resp.content))
+                eDoc = ElementTree.ElementTree(file=StringIO(resp.content))
                 code = eDoc.findtext('{%s}Error/{%s}Code' % (xmlns, xmlns))
                 error_type = eDoc.findtext('{%s}Error/{%s}Type' % (xmlns, xmlns))
                 message = eDoc.findtext('{%s}Error/{%s}Message' % (xmlns, xmlns))

@@ -120,7 +120,7 @@ class SQSClient(aws_client.Client):
 
         response_content = self._call(params, queue_url, request_credentials,
                                       timeout=wait_time + 3 if wait_time else None).content
-        return Message._parse_list(StringIO.StringIO(response_content), self._xmlns)
+        return Message._parse_list(StringIO(response_content), self._xmlns)
 
     @retry_on_failure(max_tries=25, http_error_extractor=aws_client.Client._get_xml_extractor(_xmlns))
     @timeout()
@@ -138,7 +138,7 @@ class SQSClient(aws_client.Client):
         if delay_seconds:
             params["DelaySeconds"] = delay_seconds
 
-        root = ElementTree.ElementTree(file=StringIO.StringIO(self._call(params, queue_url, request_credentials, verb='POST').content))
+        root = ElementTree.ElementTree(file=StringIO(self._call(params, queue_url, request_credentials, verb='POST').content))
         message_id = root.findtext('{%s}SendMessageResult/{%s}MessageId' % (self._xmlns, self._xmlns))
         md5_of_body = root.findtext('{%s}SendMessageResult/{%s}MD5OfMessageBody' % (self._xmlns, self._xmlns))
 
