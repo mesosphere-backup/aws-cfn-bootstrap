@@ -1,0 +1,133 @@
+#!/usr/bin/env python
+
+#==============================================================================
+# Copyright 2011 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#==============================================================================
+import sys
+import cfnbootstrap
+from cfnbootstrap.cfn_client import CloudFormationClient
+from optparse import OptionParser
+from cfnbootstrap.construction import Contractor, WorkLog
+from cfnbootstrap import util
+import logging
+import os
+
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
+parser = OptionParser()
+parser.add_option_group(util.get_cred_options(parser))
+parser.add_option_group(util.get_proxy_options(parser))
+
+parser.add_option("-s", "--stack", help="A CloudFormation stack",
+                  type="string", dest="stack_name")
+parser.add_option("-r", "--resource", help="A CloudFormation logical resource ID",
+                  type="string", dest="logical_resource_id")
+
+parser.add_option("-c", "--configsets", help='An optional list of configSets (default: "default")',
+                  type="string", dest="configsets")
+
+parser.add_option("-u", "--url", help="The CloudFormation service URL. The endpoint URL must match the region option. Use of this parameter is discouraged.",
+                  type="string", dest="endpoint")
+parser.add_option("", "--region", help="The CloudFormation region. Default: us-east-1.",
+                  type="string", dest="region", default="us-east-1")
+
+parser.add_option("-v", "--verbose", help="Enables verbose logging",
+                  action="store_true", dest="verbose")
+
+if os.name == "nt":
+    parser.add_option("", "--resume", help="Resume from a previous cfn-init run",
+                      action="store_true", dest="resume")
+
+(options, args) = parser.parse_args()
+
+cfnbootstrap.configureLogging("DEBUG" if options.verbose else "INFO")
+
+worklog = WorkLog()
+
+if os.name == "nt" and options.resume:
+
+    if not worklog.has_key('metadata'):
+        print >> sys.stderr, "Error: cannot resume from previous session; no metadata stored"
+        sys.exit(1)
+
+    try:
+        worklog.resume()
+    except Exception, e:
+        print >> sys.stderr, "Error occurred during resume: %s" % str(e)
+        logging.exception("Unhandled exception during resume: %s", str(e))
+        sys.exit(1)
+    sys.exit(0)
+
+if not options.stack_name or not options.logical_resource_id:
+    print >> sys.stderr, "Error: You must specify both a stack name and logical resource id"
+    parser.print_help(sys.stderr)
+    sys.exit(1)
+
+creds = util.get_creds_or_die(options)
+
+url = CloudFormationClient.endpointForRegion(options.region)
+if options.endpoint:
+    url = options.endpoint
+
+configSets = ["default"]
+if options.configsets:
+    configSets = options.configsets.split(',')
+
+proxyinfo = util.get_proxyinfo(options)
+
+try:
+    detail = CloudFormationClient(creds, url=url, region=options.region, proxyinfo=proxyinfo).describe_stack_resource(options.logical_resource_id, options.stack_name)
+except IOError, e:
+    if e.strerror:
+        print >> sys.stderr, e.strerror
+    else:
+        print >> sys.stderr, "Unknown error retrieving %s" % options.logical_resource_id
+    sys.exit(1)
+
+if not detail.metadata:
+    print >> sys.stderr, "Error: %s does not specify any metadata" % detail.logicalResourceId
+    sys.exit(1)
+
+if os.name == 'nt':
+    data_dir = os.path.expandvars(r'${SystemDrive}\cfn\cfn-init\data')
+else:
+    data_dir = '/var/lib/cfn-init/data'
+if not os.path.isdir(data_dir) and not os.path.exists(data_dir):
+    os.makedirs(data_dir)
+
+if os.path.isdir(data_dir):
+    with file(os.path.join(data_dir, 'metadata.json'), 'w') as f:
+        json.dump(detail.metadata, f, indent=4)
+else:
+    print >> sys.stderr, "Could not create %s to store metadata" % data_dir
+    logging.error("Could not create %s to store metadata", data_dir)
+
+if Contractor.metadataValid(detail.metadata):
+    try:
+        logging.info("Starting build".center(60,'-'))
+        worklog.build(detail.metadata, configSets)
+    except Exception, e:
+        logging.error("BUILD FAILED!".center(60,'-'))
+        print >> sys.stderr, "Error occurred during build: %s" % str(e)
+        logging.exception("Unhandled exception during build: %s" % str(e))
+        sys.exit(1)
+    else:
+        logging.info("Build complete".center(60,'-'))
+else:
+    print >> sys.stderr, "Could not find 'AWS::CloudFormation::Init' key in metadata for %s." % options.logical_resource_id
+    sys.exit(0)

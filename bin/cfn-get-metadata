@@ -1,0 +1,90 @@
+#!/usr/bin/env python
+
+#==============================================================================
+# Copyright 2011 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#==============================================================================
+import cfnbootstrap
+from cfnbootstrap.cfn_client import CloudFormationClient
+from optparse import OptionParser
+from cfnbootstrap import util
+import sys
+
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
+parser = OptionParser()
+parser.add_option_group(util.get_cred_options(parser))
+parser.add_option_group(util.get_proxy_options(parser))
+
+parser.add_option("-s", "--stack", help="A CloudFormation stack",
+                  type="string", dest="stack_name")
+parser.add_option("-r", "--resource", help="A CloudFormation logical resource ID",
+                  type="string", dest="logical_resource_id")
+parser.add_option("-k", "--key", help="Retrieve the value at <key> in the Metadata object; must be in dotted object notation (parent.child.leaf)",
+                  type="string", dest="key")
+
+parser.add_option("-u", "--url", help="The CloudFormation service URL. The endpoint URL must match the region option. Use of this parameter is discouraged.",
+                  type="string", dest="endpoint")
+parser.add_option("", "--region", help="The CloudFormation region. Default: us-east-1.",
+                  type="string", dest="region", default="us-east-1")
+
+parser.add_option("-v", "--verbose", help="Enables verbose logging",
+                  action="store_true", dest="verbose")
+
+(options, args) = parser.parse_args()
+
+if not options.stack_name or not options.logical_resource_id:
+    print >> sys.stderr, "Error: You must specify both a stack name and logical resource id"
+    parser.print_help(sys.stderr)
+    sys.exit(1)
+
+cfnbootstrap.configureLogging("DEBUG" if options.verbose else "INFO")
+
+creds = util.get_creds_or_die(options)
+
+url = CloudFormationClient.endpointForRegion(options.region)
+if options.endpoint:
+    url = options.endpoint
+
+client = CloudFormationClient(creds, url=url, region=options.region, proxyinfo=util.get_proxyinfo(options))
+
+try:
+    detail = client.describe_stack_resource(options.logical_resource_id, options.stack_name)
+except IOError, e:
+    if e.strerror:
+        print >> sys.stderr, e.strerror
+    else:
+        print >> sys.stderr, "Unknown error retrieving %s" % options.logical_resource_id
+    sys.exit(1)
+
+if not detail.metadata:
+    print >> sys.stderr, "Error: %s does not specify any metadata" % detail.logicalResourceId
+    sys.exit(1)
+
+metadata_to_dump = detail.metadata
+
+if options.key:
+    metadata_to_dump = util.extract_value(metadata_to_dump, options.key)
+    if not metadata_to_dump:
+        print >> sys.stderr, "Error: %s is not present in the metadata for %s" % (options.key, detail.logicalResourceId)
+        sys.exit(1)
+
+if isinstance(metadata_to_dump, basestring):
+    print >> sys.stdout, metadata_to_dump
+else:
+    json.dump(metadata_to_dump, sys.stdout, indent=4)
+    print >> sys.stdout, "" # This removes the annoying no-EOL symbols from some consoles, as json.dump does not end with a newline

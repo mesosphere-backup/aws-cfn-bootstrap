@@ -1,0 +1,61 @@
+#!/bin/bash
+#
+# cfn-hup       CloudFormation update trigger daemon
+#
+# chkconfig:    - 80 20
+#
+# description:  Runs user-specified actions when a
+#               specified CloudFormation stack is
+#               updated
+# processname:  cfn-hup
+# config: /etc/cfn/cfn-hup.conf
+# pidfile: /var/run/cfn-hup.pid
+#
+# source function library
+. /etc/rc.d/init.d/functions
+
+RETVAL=0
+
+start() {
+        echo -n $"Starting cfn-hup: "
+        daemon /opt/aws/bin/cfn-hup
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && touch /var/lock/subsys/cfn-hup
+}
+
+stop() {
+        echo -n $"Stopping cfn-hup: "
+        killproc -p /var/run/cfn-hup.pid cfn-hup
+        echo
+        [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/cfn-hup
+}
+  
+restart() {
+        stop
+        start
+}
+
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart|force-reload|reload)
+        restart
+        ;;
+  condrestart|try-restart)
+        [ -f /var/lock/subsys/cfn-hup ] && restart
+        ;;
+  status)
+        status -p /var/run/cfn-hup.pid cfn-hup
+        RETVAL=$?
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|status|restart|reload|force-reload|condrestart}"
+        exit 1
+esac
+  
+exit $RETVAL
