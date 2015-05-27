@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 #==============================================================================
 # Copyright 2011 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #

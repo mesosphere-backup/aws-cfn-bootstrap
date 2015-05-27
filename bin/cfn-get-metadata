@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 #!/usr/bin/env python
 
 #==============================================================================
@@ -48,7 +50,7 @@ parser.add_option("-v", "--verbose", help="Enables verbose logging",
 (options, args) = parser.parse_args()
 
 if not options.stack_name or not options.logical_resource_id:
-    print >> sys.stderr, "Error: You must specify both a stack name and logical resource id"
+    print("Error: You must specify both a stack name and logical resource id", file=sys.stderr)
     parser.print_help(sys.stderr)
     sys.exit(1)
 
@@ -64,15 +66,15 @@ client = CloudFormationClient(creds, url=url, region=options.region, proxyinfo=u
 
 try:
     detail = client.describe_stack_resource(options.logical_resource_id, options.stack_name)
-except IOError, e:
+except IOError as e:
     if e.strerror:
-        print >> sys.stderr, e.strerror
+        print(e.strerror, file=sys.stderr)
     else:
-        print >> sys.stderr, "Unknown error retrieving %s" % options.logical_resource_id
+        print("Unknown error retrieving %s" % options.logical_resource_id, file=sys.stderr)
     sys.exit(1)
 
 if not detail.metadata:
-    print >> sys.stderr, "Error: %s does not specify any metadata" % detail.logicalResourceId
+    print("Error: %s does not specify any metadata" % detail.logicalResourceId, file=sys.stderr)
     sys.exit(1)
 
 metadata_to_dump = detail.metadata
@@ -80,11 +82,11 @@ metadata_to_dump = detail.metadata
 if options.key:
     metadata_to_dump = util.extract_value(metadata_to_dump, options.key)
     if not metadata_to_dump:
-        print >> sys.stderr, "Error: %s is not present in the metadata for %s" % (options.key, detail.logicalResourceId)
+        print("Error: %s is not present in the metadata for %s" % (options.key, detail.logicalResourceId), file=sys.stderr)
         sys.exit(1)
 
 if isinstance(metadata_to_dump, basestring):
-    print >> sys.stdout, metadata_to_dump
+    print(metadata_to_dump, file=sys.stdout)
 else:
     json.dump(metadata_to_dump, sys.stdout, indent=4)
-    print >> sys.stdout, "" # This removes the annoying no-EOL symbols from some consoles, as json.dump does not end with a newline
+    print("", file=sys.stdout) # This removes the annoying no-EOL symbols from some consoles, as json.dump does not end with a newline

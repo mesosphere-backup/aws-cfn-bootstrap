@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 #==============================================================================
 # Copyright 2011 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
@@ -61,12 +62,12 @@ class SourcesTool(object):
             if SourcesTool._remote_pattern.match(archive):
                 try:
                     archive_file = self._archive_from_url(archive, auth_config)
-                except IOError, e:
+                except IOError as e:
                     raise ToolError("Failed to retrieve %s: %s" % (archive, e.strerror))
             else:
                 if not os.path.isfile(archive):
                     raise ToolError("%s does not exist" % archive)
-                archive_file = file(archive, 'rb')
+                archive_file = open(archive, 'rb')
 
             if TarWrapper.is_compatible(archive_file):
                 log.debug("Treating %s as a tarball", archive)

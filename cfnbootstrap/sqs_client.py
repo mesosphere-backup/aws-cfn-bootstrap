@@ -21,6 +21,7 @@ SQSClient - an HTTP client that makes API calls against SQS
 Message  - a message from an SQS queue
 
 """
+from __future__ import absolute_import
 from cfnbootstrap import aws_client
 from cfnbootstrap.aws_client import V4Signer
 from cfnbootstrap.util import retry_on_failure, timeout

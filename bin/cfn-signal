@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 #!/usr/bin/env python
 
 #==============================================================================
@@ -99,24 +101,24 @@ def signal_wch(options, args):
     try:
         url = args[0] if re.match(r'https?://.*', args[0]) else base64.b64decode(args[0])
     except TypeError:
-        print >> sys.stderr, "Error: Invalid WaitConditionHandle URL specified: %s" % args[0]
+        print("Error: Invalid WaitConditionHandle URL specified: %s" % args[0], file=sys.stderr)
         sys.exit(1)
 
     if not re.match(r'https?://.*', url):
-        print >> sys.stderr, "Error: Invalid WaitConditionHandle URL specified: %s" % args[0]
+        print("Error: Invalid WaitConditionHandle URL specified: %s" % args[0], file=sys.stderr)
         sys.exit(1)
 
     try:
         send(url, data)
-        print 'CloudFormation signaled successfully with %s.' % data['Status']
+        print('CloudFormation signaled successfully with %s.' % data['Status'])
         sys.exit(0)
-    except IOError, e:
-        print >> sys.stderr, 'Error signaling CloudFormation: %s' % str(e)
+    except IOError as e:
+        print('Error signaling CloudFormation: %s' % str(e), file=sys.stderr)
         sys.exit(1)
 
 def signal_resource(options, args):
     if not options.stack_name:
-        print >> sys.stderr, "Error: You must specify a stack name when signaling a resource"
+        print("Error: You must specify a stack name when signaling a resource", file=sys.stderr)
         parser.print_help(sys.stderr)
         sys.exit(1)
 
@@ -130,18 +132,18 @@ def signal_resource(options, args):
 
     try:
         CloudFormationClient(creds, url=url, region=options.region, proxyinfo=proxyinfo).signal_resource(options.logical_resource_id, options.stack_name, options.id, status)
-    except IOError, e:
+    except IOError as e:
         if e.strerror:
-            print >> sys.stderr, e.strerror
+            print(e.strerror, file=sys.stderr)
         else:
-            print >> sys.stderr, "Unknown error signaling %s" % options.logical_resource_id
+            print("Unknown error signaling %s" % options.logical_resource_id, file=sys.stderr)
         sys.exit(1)
 
 is_wch_signal = args and args[0]
 is_resource_signal = options.logical_resource_id is not None
 
 if is_wch_signal and is_resource_signal:
-    print >> sys.stderr, "Error: Cannot specify both a WaitConditionHandle URL and a logical resource id"
+    print("Error: Cannot specify both a WaitConditionHandle URL and a logical resource id", file=sys.stderr)
     sys.exit(1)
 
 if is_wch_signal:
@@ -149,6 +151,6 @@ if is_wch_signal:
 elif is_resource_signal:
     signal_resource(options, args)
 else:
-    print >> sys.stderr, "Error: No WaitConditionHandle URL or logical resource id specified"
+    print("Error: No WaitConditionHandle URL or logical resource id specified", file=sys.stderr)
     parser.print_help(sys.stderr)
     sys.exit(1)

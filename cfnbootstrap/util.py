@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 #==============================================================================
 # Copyright 2011 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
@@ -156,16 +158,16 @@ def retry_on_failure(max_tries = 5, http_error_extractor=_extract_http_error):
 
                 try:
                     return f(*args, **kwargs)
-                except SSLError, e:
+                except SSLError as e:
                     log.exception("SSLError")
                     raise RemoteError(None, str(e), retry_mode='TERMINAL')
-                except ChecksumError, e:
+                except ChecksumError as e:
                     log.exception("Checksum mismatch")
                     last_error = RemoteError(None, str(e))
-                except ConnectionError, e:
+                except ConnectionError as e:
                     log.exception('ConnectionError')
                     last_error = RemoteError(None, str(e))
-                except ProxyError, e:
+                except ProxyError as e:
                     log.exception('ProxyError')
                     last_error = RemoteError(None, str(e))
                     # ProxyError skips the typical 3 retries done by urllib
@@ -174,7 +176,7 @@ def retry_on_failure(max_tries = 5, http_error_extractor=_extract_http_error):
                     # and newer versions of urllib3 always wrap socket errors in ProxyError when proxies is not None
                     if len(durations) < max_tries * 3:
                         extend_backoff(durations)
-                except HTTPError, e:
+                except HTTPError as e:
                     last_error = http_error_extractor(e.response)
                     if last_error.retry_mode == 'TERMINAL':
                         raise last_error
@@ -182,16 +184,16 @@ def retry_on_failure(max_tries = 5, http_error_extractor=_extract_http_error):
                         extend_backoff(durations)
 
                     log.exception(last_error.strerror)
-                except Timeout, e:
+                except Timeout as e:
                     log.exception('Timeout')
                     last_error = RemoteError(None, str(e))
-                except TimeoutError, e:
+                except TimeoutError as e:
                     log.exception('Client-side timeout')
                     last_error = RemoteError(None, str(e))
-                except IOError, e:
+                except IOError as e:
                     log.exception('Generic IOError')
                     last_error = RemoteError(None, str(e))
-                except Exception, e:
+                except Exception as e:
                     log.exception('Unexpected Exception')
                     raise RemoteError(None, str(e), 'TERMINAL')
             else:
@@ -199,10 +201,10 @@ def retry_on_failure(max_tries = 5, http_error_extractor=_extract_http_error):
         return _retry
     return _decorate
 
-class TimeoutError(StandardError):
+class TimeoutError(Exception):
 
     def __init__(self, msg):
-        super(StandardError, self).__init__()
+        super(Exception, self).__init__()
         self.msg = msg
 
 
@@ -214,7 +216,7 @@ def timeout(duration=60):
             def value_fn():
                 try:
                     ret_val.append(f(*args, **kwargs))
-                except Exception, e:
+                except Exception as e:
                     exc.append(e)
 
             worker_thread = threading.Thread(target=value_fn)
@@ -364,8 +366,8 @@ def get_creds_or_die(options):
     if options.credential_file:
         try:
             return extract_credentials(options.credential_file)
-        except IOError, e:
-            print >> sys.stderr, "Error retrieving credentials from file:\n\t%s" % e.strerror
+        except IOError as e:
+            print("Error retrieving credentials from file:\n\t%s" % e.strerror, file=sys.stderr)
             sys.exit(1)
     elif options.iam_role:
         return get_role_creds(options.iam_role)
@@ -388,7 +390,7 @@ def extract_credentials(path):
             raise IOError(None, "Credential file cannot be accessible by group or other. Please chmod 600 the credential file.")
 
     access_key, secret_key = '', ''
-    with file(path, 'r') as f:
+    with open(path, 'r') as f:
         for line in (line.strip() for line in f):
             if line.startswith("AWSAccessKeyId="):
                 access_key = line.partition('=')[2]

@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 #!/usr/bin/env python
 
 #==============================================================================
@@ -47,7 +49,7 @@ parser.add_option("-v", "--verbose", help="Enables verbose logging",
 
 def fail_on_unspecified(value, name):
     if not value:
-        print >> sys.stderr, "Error: You must specify %s" % name
+        print("Error: You must specify %s" % name, file=sys.stderr)
         parser.print_help(sys.stderr)
         sys.exit(1)
 
@@ -72,9 +74,9 @@ try:
                                        options.invocation_id,
                                        options.listener_id)
     sys.exit(0 if leader == options.listener_id else 5)
-except IOError, e:
+except IOError as e:
     if e.strerror:
-        print >> sys.stderr, e.strerror
+        print(e.strerror, file=sys.stderr)
     else:
-        print >> sys.stderr, "Unknown error electing command leader"
+        print("Unknown error electing command leader", file=sys.stderr)
     sys.exit(1)

@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 #==============================================================================
 # Copyright 2011 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
@@ -131,5 +133,5 @@ def configureLogging(level='INFO', quiet=False, filename='cfn-init.log', log_dir
         config['wire_handler'] = 'null'
         config['cmd_handler']  = 'null'
         if not quiet:
-            print >> sys.stderr, "Could not open %s for logging.  Using stderr instead." % output_file
+            print("Could not open %s for logging.  Using stderr instead." % output_file, file=sys.stderr)
         logging.config.fileConfig(StringIO.StringIO(_config), config)

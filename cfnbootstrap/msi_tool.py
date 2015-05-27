@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 #==============================================================================
 # Copyright 2011 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
@@ -64,7 +65,7 @@ class MsiTool(object):
                 if MsiTool._remote_pattern.match(loc):
                     try:
                         msi_file = self._msi_from_url(loc, auth_config)
-                    except IOError, e:
+                    except IOError as e:
                         raise ToolError("Failed to retrieve %s: %s" % (loc, e.strerror))
                     tmp_pkgs.append(msi_file)
                 else:

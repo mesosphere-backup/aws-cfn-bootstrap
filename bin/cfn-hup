@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 #!/usr/bin/env python
 
 #==============================================================================
@@ -61,7 +63,7 @@ def main():
 
     try:
         main_config, processor, cmd_processor = update_hooks.parse_config(options.config_path)
-    except ValueError, e:
+    except ValueError as e:
         logging.error("Error: %s", str(e))
         sys.exit(1)
 
@@ -94,10 +96,10 @@ def main():
 
             try:
                 processor.process()
-            except update_hooks.FatalUpdateError, e:
+            except update_hooks.FatalUpdateError as e:
                 logging.exception("Fatal exception")
                 fatal_event.set()
-            except Exception, e:
+            except Exception as e:
                 logging.exception("Unhandled exception")
 
             with timer_lock:
@@ -125,10 +127,10 @@ def main():
                     delay = 20
                 else:
                     cmd_processor.process()
-            except update_hooks.FatalUpdateError, e:
+            except update_hooks.FatalUpdateError as e:
                 logging.exception("Fatal exception")
                 fatal_event.set()
-            except Exception, e:
+            except Exception as e:
                 logging.exception("Unhandled exception")
 
             with timer_lock:
@@ -169,7 +171,7 @@ else:
     try:
         import daemon
     except ImportError:
-        print >> sys.stderr, "Daemon library was not installed; please install python-daemon"
+        print("Daemon library was not installed; please install python-daemon", file=sys.stderr)
         sys.exit(1)
 
     try:
@@ -185,6 +187,6 @@ else:
                               signal_map={signal.SIGTERM : kill}):
         try:
             main()
-        except Exception, e:
+        except Exception as e:
             logging.exception("Unhandled exception: %s", str(e))
             sys.exit(1)

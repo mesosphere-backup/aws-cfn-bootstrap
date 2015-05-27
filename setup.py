@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 #!/usr/bin/env python
 
 #==============================================================================
@@ -23,7 +25,7 @@ name = 'aws-cfn-bootstrap'
 version = '1.4'
 
 if sys.version_info[0] == 2 and sys.version_info[1] < 6:
-        print >> sys.stderr, "Python 2.6+ is required"
+        print("Python 2.6+ is required", file=sys.stderr)
         sys.exit(1)
 
 rpm_requires = ['python >= 2.6', 'python-daemon', 'pystache', 'python-requests']

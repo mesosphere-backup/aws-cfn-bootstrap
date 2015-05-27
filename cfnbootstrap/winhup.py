@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 #==============================================================================
 # Copyright 2011 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
@@ -44,7 +45,7 @@ class HupService(win32serviceutil.ServiceFramework):
     def SvcDoRun(self):
         try:
             main_config, processor, cmd_processor = update_hooks.parse_config(os.path.expandvars('${SystemDrive}\cfn'))
-        except ValueError, e:
+        except ValueError as e:
             servicemanager.LogMsg(servicemanager.EVENTLOG_ERROR_TYPE,
                                   servicemanager.PYS_SERVICE_STOPPING,
                                   (self._svc_name_, ': %s' % str(e)))

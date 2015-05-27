@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 #==============================================================================
 # Copyright 2011 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
@@ -31,7 +32,7 @@ import socket
 import subprocess
 import tempfile
 import time
-from util import Credentials
+from .util import Credentials
 
 try:
     import simplejson as json
@@ -58,7 +59,7 @@ def parse_config(config_path):
     elif main_config.has_option('main', 'credential-file'):
         try:
             credentials = util.extract_credentials(main_config.get('main', 'credential-file'))
-        except IOError, e:
+        except IOError as e:
             raise ValueError("Could not retrieve credentials from file:\n\t%s" % e.strerror)
     else:
         credentials = Credentials('', '')
@@ -222,7 +223,7 @@ class AutoRefreshingCredentialsProvider(object):
             try:
                 self._creds = self._cfn_client.get_listener_credentials(self._stack_name, self._listener_id)
                 self.listener_expired = False
-            except IOError, e:
+            except IOError as e:
                 if hasattr(e, 'error_code') and 'ListenerExpired' == e.error_code:
                     self.listener_expired = True
                     log.exception("Listener expired")
@@ -304,7 +305,7 @@ class CmdProcessor(object):
 
     def _load_commands_run(self):
         if os.path.isfile(self._runfile):
-            with file(self._runfile, 'r') as f:
+            with open(self._runfile, 'r') as f:
                 try:
                     return json.load(f)
                 except Exception:
@@ -367,7 +368,7 @@ class CmdProcessor(object):
                 log.exception('Could not write runfile to %s', self._runfile)
 
     def _write_commands_run(self):
-        with file(self._runfile, 'w') as f:
+        with open(self._runfile, 'w') as f:
             json.dump(self._commands_run, f)
 
 
@@ -424,7 +425,7 @@ class CmdProcessor(object):
 
         except FatalUpdateError:
             raise
-        except IOError, e:
+        except IOError as e:
             if hasattr(e, 'error_code') and 'AWS.SimpleQueueService.NonExistentQueue' == e.error_code:
                 self.queue_url = None
             log.exception("IOError caught while processing messages")

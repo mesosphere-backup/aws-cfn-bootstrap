@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 #!/usr/bin/env python
 
 #==============================================================================
@@ -59,13 +61,13 @@ options.event_handle = options.event_handle if re.match(r'https?://.*', options.
     else base64.b64decode(options.event_handle)
 
 if not re.match(r'https?://.*', options.event_handle):
-    print >> sys.stderr, "Error: Invalid EventHandle URL specified: %s" % options.event_handle
+    print("Error: Invalid EventHandle URL specified: %s" % options.event_handle, file=sys.stderr)
     sys.exit(1)
 
 
 def fail_on_unspecified(value, name):
     if not value:
-        print >> sys.stderr, "Error: You must specify %s" % name
+        print("Error: You must specify %s" % name, file=sys.stderr)
         parser.print_help(sys.stderr)
         sys.exit(1)
 
@@ -101,8 +103,8 @@ def send(url, data):
 
 try:
     send(options.event_handle, result_msg)
-    print 'Command Event with id %s sent successfully.' % options.event_id
+    print('Command Event with id %s sent successfully.' % options.event_id)
     sys.exit(0)
-except IOError, e:
-    print >> sys.stderr, 'Error sending Command Event: %s' % str(e)
+except IOError as e:
+    print('Error sending Command Event: %s' % str(e), file=sys.stderr)
     sys.exit(1)

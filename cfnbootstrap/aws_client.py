@@ -20,6 +20,7 @@ Classes:
 AWSClient - an HTTP client that makes signed requests
 
 """
+from __future__ import absolute_import
 from cfnbootstrap import util
 from requests import api
 from xml.etree import ElementTree

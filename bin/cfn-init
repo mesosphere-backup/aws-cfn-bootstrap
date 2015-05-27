@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 #!/usr/bin/env python
 
 #==============================================================================
@@ -61,20 +63,20 @@ worklog = WorkLog()
 
 if os.name == "nt" and options.resume:
 
-    if not worklog.has_key('metadata'):
-        print >> sys.stderr, "Error: cannot resume from previous session; no metadata stored"
+    if 'metadata' not in worklog:
+        print("Error: cannot resume from previous session; no metadata stored", file=sys.stderr)
         sys.exit(1)
 
     try:
         worklog.resume()
-    except Exception, e:
-        print >> sys.stderr, "Error occurred during resume: %s" % str(e)
+    except Exception as e:
+        print("Error occurred during resume: %s" % str(e), file=sys.stderr)
         logging.exception("Unhandled exception during resume: %s", str(e))
         sys.exit(1)
     sys.exit(0)
 
 if not options.stack_name or not options.logical_resource_id:
-    print >> sys.stderr, "Error: You must specify both a stack name and logical resource id"
+    print("Error: You must specify both a stack name and logical resource id", file=sys.stderr)
     parser.print_help(sys.stderr)
     sys.exit(1)
 
@@ -92,15 +94,15 @@ proxyinfo = util.get_proxyinfo(options)
 
 try:
     detail = CloudFormationClient(creds, url=url, region=options.region, proxyinfo=proxyinfo).describe_stack_resource(options.logical_resource_id, options.stack_name)
-except IOError, e:
+except IOError as e:
     if e.strerror:
-        print >> sys.stderr, e.strerror
+        print(e.strerror, file=sys.stderr)
     else:
-        print >> sys.stderr, "Unknown error retrieving %s" % options.logical_resource_id
+        print("Unknown error retrieving %s" % options.logical_resource_id, file=sys.stderr)
     sys.exit(1)
 
 if not detail.metadata:
-    print >> sys.stderr, "Error: %s does not specify any metadata" % detail.logicalResourceId
+    print("Error: %s does not specify any metadata" % detail.logicalResourceId, file=sys.stderr)
     sys.exit(1)
 
 if os.name == 'nt':
@@ -111,23 +113,23 @@ if not os.path.isdir(data_dir) and not os.path.exists(data_dir):
     os.makedirs(data_dir)
 
 if os.path.isdir(data_dir):
-    with file(os.path.join(data_dir, 'metadata.json'), 'w') as f:
+    with open(os.path.join(data_dir, 'metadata.json'), 'w') as f:
         json.dump(detail.metadata, f, indent=4)
 else:
-    print >> sys.stderr, "Could not create %s to store metadata" % data_dir
+    print("Could not create %s to store metadata" % data_dir, file=sys.stderr)
     logging.error("Could not create %s to store metadata", data_dir)
 
 if Contractor.metadataValid(detail.metadata):
     try:
         logging.info("Starting build".center(60,'-'))
         worklog.build(detail.metadata, configSets)
-    except Exception, e:
+    except Exception as e:
         logging.error("BUILD FAILED!".center(60,'-'))
-        print >> sys.stderr, "Error occurred during build: %s" % str(e)
+        print("Error occurred during build: %s" % str(e), file=sys.stderr)
         logging.exception("Unhandled exception during build: %s" % str(e))
         sys.exit(1)
     else:
         logging.info("Build complete".center(60,'-'))
 else:
-    print >> sys.stderr, "Could not find 'AWS::CloudFormation::Init' key in metadata for %s." % options.logical_resource_id
+    print("Could not find 'AWS::CloudFormation::Init' key in metadata for %s." % options.logical_resource_id, file=sys.stderr)
     sys.exit(0)

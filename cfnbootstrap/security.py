@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 #==============================================================================
 # Copyright 2011 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
@@ -26,4 +27,4 @@ def create_group(group_name, gid=None):
     logging.warn("Unsupported OS for group operations: %s", os.name)
 
 if os.name == "posix":
-    from posix_security import *
+    from .posix_security import *

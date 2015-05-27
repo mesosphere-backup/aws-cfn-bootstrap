@@ -21,13 +21,14 @@ CloudFormationClient - an HTTP client that makes API calls against CloudFormatio
 StackResourceDetail  - detailed information about a StackResource
 
 """
+from __future__ import absolute_import
 from cfnbootstrap import aws_client, util
 from cfnbootstrap.aws_client import CFNSigner, V4Signer
 from cfnbootstrap.util import retry_on_failure, timeout
 import datetime
 import logging
 import re
-from util import Credentials
+from .util import Credentials
 
 try:
     import simplejson as json

@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 #==============================================================================
 # Copyright 2011 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
@@ -64,8 +65,8 @@ class FileTool(object):
             return True
 
         # Borrowed from filecmp
-        with file(f1, 'rb') as fp1:
-            with file(f2, 'rb') as fp2:
+        with open(f1, 'rb') as fp1:
+            with open(f2, 'rb') as fp2:
                 bufsize = 8 * 1024
                 while True:
                     b1 = fp1.read(bufsize)
@@ -122,7 +123,7 @@ class FileTool(object):
                     os.symlink(attribs["content"], filename)
                 else:
                     file_is_text = 'content' in attribs and not self._is_base64(attribs)
-                    with file(filename, 'w' + ('' if file_is_text else 'b')) as f:
+                    with open(filename, 'w' + ('' if file_is_text else 'b')) as f:
                         log.debug("Writing content to %s", filename)
                         self._write_file(f, attribs, auth_config)
 
@@ -160,7 +161,7 @@ class FileTool(object):
                     self._backup_file(backup_file, filename)
                     if backup_backup_file:
                         self._backup_file(backup_backup_file, backup_file)
-                except ToolError, t:
+                except ToolError as t:
                     log.warn("Error restoring %s from backup", filename)
             raise
         else:
@@ -173,14 +174,14 @@ class FileTool(object):
             elif backup_file and backup_backup_file:
                 try:
                     self._backup_file(backup_backup_file, backup_file)
-                except ToolError, t:
+                except ToolError as t:
                     log.warn("Error restoring backup file %s: %s", backup_file, str(t))
 
     def _backup_file(self, source, dest):
         try:
             log.debug("Moving %s to %s", source, dest)
             os.rename(source, dest)
-        except OSError, e:
+        except OSError as e:
             log.error("Could not move %s to %s", source, dest)
             raise ToolError("Could not rename %s: %s" % (source, str(e)))
 
@@ -201,7 +202,7 @@ class FileTool(object):
             try:
                 self._write_remote_file(source, auth_config.get_auth(attribs.get('authentication', None)), dest_fileobj,
                                       attribs.get('context'))
-            except IOError, e:
+            except IOError as e:
                 raise ToolError("Failed to retrieve %s: %s" % (source, e.strerror))
 
     def _render_template(self, content, context):
@@ -211,7 +212,7 @@ class FileTool(object):
         log.debug('Rendering as Mustache template')
         try:
             return Renderer(string_encoding='utf-8', file_encoding='utf-8').render(content, context)
-        except Exception, e:
+        except Exception as e:
             raise ToolError("Failed to render content as a Mustache template: %s" % e.message)
 
     @util.retry_on_failure()

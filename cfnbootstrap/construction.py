@@ -26,6 +26,8 @@ CloudFormationCarpenter - Orchestrates a non-delegated installation
 YumTool - installs packages via yum
 
 """
+from __future__ import absolute_import
+from __future__ import print_function
 from cfnbootstrap import platform_utils
 from cfnbootstrap.apt_tool import AptTool
 from cfnbootstrap.auth import AuthenticationConfig
@@ -66,7 +68,7 @@ class WorkLog(object):
             os.makedirs(self._shelf_dir)
 
         if not os.path.isdir(self._shelf_dir):
-            print >> sys.stderr, "Could not create %s to store the work log" % self._shelf_dir
+            print("Could not create %s to store the work log" % self._shelf_dir, file=sys.stderr)
             logging.error("Could not create %s to store the work log", self._shelf_dir)
 
         self._dbname = dbname
@@ -118,7 +120,7 @@ class WorkLog(object):
 
     def run_commands(self):
         cmd_tool = CommandTool()
-        while self.has_key('commands'):
+        while 'commands' in self:
             next_cmd = self.pop('commands')
             changes = self.get('changes', collections.defaultdict(list))
             cmd_options = next_cmd[1]
@@ -142,10 +144,10 @@ class WorkLog(object):
             else:
                 log.warn("Unsupported service manager: %s", manager)
 
-        if self.has_key('changes'):
+        if 'changes' in self:
             self.delete('changes')
 
-        if self.has_key('services'):
+        if 'services' in self:
             self.delete('services')
 
     def resume(self):
@@ -158,12 +160,12 @@ class WorkLog(object):
 
         #TODO: apply services when supported by Windows
 
-        while self.has_key('configs'):
+        while 'configs' in self:
             next_config = self.pop('configs')
             log.debug("Resuming config: %s", next_config.name)
             contractor.run_config(next_config, self)
 
-        if self.has_key('configSets'):
+        if 'configSets' in self:
             remaining_sets = self.get('configSets')
             log.debug("Resuming configSets: %s", remaining_sets)
             contractor.build(remaining_sets, self)
@@ -511,7 +513,7 @@ class Contractor(object):
             CloudFormationCarpenter(config, self._auth_config).build(worklog)
 
             worklog.run_commands()
-        except BuildError, e:
+        except BuildError as e:
             log.exception("Error encountered during build of %s: %s", config.name, str(e))
             raise
 
