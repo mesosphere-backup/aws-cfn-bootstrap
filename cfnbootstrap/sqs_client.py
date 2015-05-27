@@ -26,7 +26,7 @@ from cfnbootstrap import aws_client
 from cfnbootstrap.aws_client import V4Signer
 from cfnbootstrap.util import retry_on_failure, timeout
 from xml.etree import ElementTree
-import StringIO
+from io import StringIO
 import logging
 import re
 

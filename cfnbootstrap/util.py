@@ -20,7 +20,7 @@ from optparse import OptionGroup
 import threading
 import datetime
 from requests.exceptions import ConnectionError, HTTPError, Timeout, SSLError
-import StringIO
+from io import StringIO
 import imp
 import logging
 import os.path

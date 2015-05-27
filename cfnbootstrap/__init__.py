@@ -18,7 +18,7 @@ from __future__ import print_function
 import logging.config
 import os.path
 import sys
-import StringIO
+from io import StringIO
 
 class NullHandler(logging.Handler):
     def emit(self, record):

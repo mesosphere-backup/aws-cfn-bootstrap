@@ -24,7 +24,7 @@ from __future__ import absolute_import
 from cfnbootstrap import util
 from requests import api
 from xml.etree import ElementTree
-import StringIO
+from io import StringIO
 import base64
 import datetime
 import hashlib
